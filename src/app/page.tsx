@@ -1,4 +1,10 @@
+import EarthSphere from "@/src/features/eath";
+
 const Home = () => {
-  return <div>Home</div>;
+  return (
+    <div className={"h-screen bg-black"}>
+      <EarthSphere />
+    </div>
+  );
 };
 export default Home;

@@ -76,12 +76,14 @@ const getPoints = ({ numStars = 500 }: { numStars: number }) => {
 };
 
 const Starfield = () => {
-  const ref = useRef<THREE.Mesh>(null!);
+  const ref = useRef<THREE.Points>(null!);
   const points = getPoints({ numStars: 3000 });
 
   useFrame((state) => {
     const { clock } = state;
-    ref.current.userData.update(clock.elapsedTime);
+    if (ref.current?.userData?.update) {
+      ref.current.userData.update(clock.elapsedTime);
+    }
   });
   return <primitive object={points} ref={ref} />;
 };

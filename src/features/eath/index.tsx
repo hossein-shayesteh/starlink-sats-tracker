@@ -6,9 +6,9 @@ import { OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-import EarthMaterial from "@/src/features/components/earth-material";
-import Nebula from "@/src/features/components/nebula";
-import Starfield from "@/src/features/components/starfield";
+import EarthMaterial from "@/src/features/eath/components/earth-material";
+import Nebula from "@/src/features/eath/components/nebula";
+import Starfield from "@/src/features/eath/components/starfield";
 
 const sunDirection = new THREE.Vector3(-2, 0.5, 1.5);
 
@@ -17,6 +17,7 @@ const Earth = () => {
   const axialTilt = (23.4 * Math.PI) / 180;
 
   useFrame(() => {
+    // Earth rotation speed
     ref.current.rotation.y += 1 / (24 * 60 * 60);
   });
 
@@ -32,6 +33,7 @@ const Earth = () => {
 
 const EarthSphere = () => {
   const { x, y, z } = sunDirection;
+
   return (
     <Canvas
       camera={{ position: [0, 0.1, 5] }}
@@ -42,7 +44,7 @@ const EarthSphere = () => {
       <directionalLight position={[x, y, z]} />
       <Starfield />
       <Nebula />
-      <OrbitControls />
+      <OrbitControls minDistance={2.1} maxDistance={10} rotateSpeed={0.1} />
     </Canvas>
   );
 };

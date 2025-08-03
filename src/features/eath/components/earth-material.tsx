@@ -1,15 +1,11 @@
+"use client";
+
 import React from "react";
 
-import { useLoader } from "@react-three/fiber";
+import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 
-const defaultSunDirection = new THREE.Vector3(-2, 0.5, 1.5).normalize();
-
-function EarthMaterial({
-  sunDirection = defaultSunDirection,
-}: {
-  sunDirection?: THREE.Vector3;
-}) {
+const EarthMaterial = ({ sunDirection }: { sunDirection: THREE.Vector3 }) => {
   const map = useLoader(THREE.TextureLoader, "./textures/earth-daymap-4k.jpg");
   const nightMap = useLoader(
     THREE.TextureLoader,
@@ -95,10 +91,17 @@ function EarthMaterial({
         vertexShader: vs,
         fragmentShader: fs,
       }),
-    [],
+    [uniforms, vs, fs],
   );
 
+  // Update sun direction in real-time
+  useFrame(() => {
+    if (material.uniforms) {
+      material.uniforms.sunDirection.value = sunDirection;
+    }
+  });
+
   return <primitive object={material} />;
-}
+};
 
 export default EarthMaterial;

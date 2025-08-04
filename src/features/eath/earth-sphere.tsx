@@ -20,7 +20,7 @@ const EarthSphere = () => {
         <fog attach="fog" args={[0x000000, 1, 100]} />
 
         {/* Earth */}
-        <Earth />
+        <Earth fill={false} />
 
         {/* Starfield */}
         <Starfield />

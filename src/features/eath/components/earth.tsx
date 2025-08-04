@@ -13,9 +13,11 @@ import {
 const CountryLines = ({
   geoJsonData,
   radius = 2,
+  fill,
 }: {
   geoJsonData: GeoJSONFeatureCollection;
   radius: number;
+  fill: boolean;
 }) => {
   const groupRef = useRef<THREE.Group>(null);
   const [lines, setLines] = useState<Lines[]>([]);
@@ -91,7 +93,7 @@ const CountryLines = ({
             points={line.points}
             color={color}
             transparent={true}
-            opacity={0.8}
+            opacity={fill ? 0.3 : 0.8}
           />
         );
       })}
@@ -99,7 +101,7 @@ const CountryLines = ({
   );
 };
 
-const Earth = () => {
+const Earth = ({ fill }: { fill: boolean }) => {
   const [geoJsonData, setGeoJsonData] =
     useState<GeoJSONFeatureCollection | null>(null);
 
@@ -112,19 +114,27 @@ const Earth = () => {
 
   return (
     <>
-      {/* Base sphere with wireframe */}
-      <mesh>
-        <sphereGeometry args={[2, 32, 32]} />
-        <meshBasicMaterial
-          color={0xffffff}
-          transparent={true}
-          opacity={0.1}
-          wireframe={true}
-        />
-      </mesh>
+      {fill ? (
+        <mesh>
+          <sphereGeometry args={[2, 32, 32]} />
+          <meshBasicMaterial color={0x2c3e50} transparent={true} opacity={1} />
+        </mesh>
+      ) : (
+        <mesh>
+          <sphereGeometry args={[2.00002, 32, 32]} />
+          <meshBasicMaterial
+            color={0xffffff}
+            transparent={true}
+            opacity={0.1}
+            wireframe={true}
+          />
+        </mesh>
+      )}
 
       {/* Country lines */}
-      {geoJsonData && <CountryLines geoJsonData={geoJsonData} radius={2} />}
+      {geoJsonData && (
+        <CountryLines geoJsonData={geoJsonData} radius={2.00002} fill={fill} />
+      )}
     </>
   );
 };

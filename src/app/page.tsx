@@ -1,4 +1,4 @@
-import EarthSphere from "@/src/features/eath";
+import EarthSphere from "@/src/features/eath/earth-sphere";
 
 const Home = () => {
   return (

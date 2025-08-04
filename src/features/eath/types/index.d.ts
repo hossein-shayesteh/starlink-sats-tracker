@@ -1,4 +1,4 @@
-type Position = [number, number];
+export type Position = [number, number];
 
 export interface Polygon {
   type: "Polygon";
@@ -95,4 +95,19 @@ export interface Feature {
 export interface GeoJSONFeatureCollection {
   type: "FeatureCollection";
   features: Feature[];
+}
+
+export interface GeometryCollection {
+  type: "GeometryCollection";
+  geometries: Geometry[];
+}
+
+export type GeoJSONInput =
+  | Feature
+  | GeoJSONFeatureCollection
+  | GeometryCollection;
+
+export interface Lines {
+  points: [number, number, number][];
+  id: string;
 }

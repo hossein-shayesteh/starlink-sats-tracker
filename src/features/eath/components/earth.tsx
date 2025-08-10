@@ -107,7 +107,7 @@ const Earth = ({ fill }: { fill: boolean }) => {
 
   useEffect(() => {
     // In your real implementation, replace this with:
-    fetch("/geojson/ne_50m_admin_0_countries.json")
+    fetch("/geojson/ne_110m_admin_0_countries.json")
       .then((response) => response.json())
       .then((data) => setGeoJsonData(data));
   }, []);

@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 

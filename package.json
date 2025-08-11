@@ -41,6 +41,8 @@
     "@react-three/fiber": "^9.3.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/three": "^0.178.1",
+    "@typescript-eslint/eslint-plugin": "^8.39.0",
+    "@typescript-eslint/parser": "^8.39.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -74,10 +76,10 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/suncalc": "^1.9.2",
-    "eslint": "^9",
+    "eslint": "^9.33.0",
     "eslint-config-next": "15.4.5",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.6",
-    "typescript": "^5"
+    "typescript": "^5.9.2"
   }
 }

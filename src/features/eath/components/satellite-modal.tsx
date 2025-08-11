@@ -1,8 +1,14 @@
-import React from "react";
-
-import { Clock, Globe, Satellite, X, Zap } from "lucide-react";
+import { Globe, Satellite, X, Zap } from "lucide-react";
 
 import { SatellitePosition } from "@/src/features/eath/components/satellite";
+
+import { Button } from "@/src/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/src/components/ui/card";
 
 interface SatelliteModalProps {
   satellite: SatellitePosition | null;
@@ -24,227 +30,141 @@ const SatelliteModal = ({
   };
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
-      <div className="m-4 max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white shadow-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between rounded-t-lg border-b bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-          <div className="flex items-center space-x-3">
-            <Satellite size={32} />
+    <Card className="fixed inset-y-5 right-5 z-50 w-full max-w-md overflow-y-auto border-none p-0">
+      {/* Header */}
+      <CardHeader className="sticky top-0 flex items-center justify-between border-b bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
+        <div className="flex items-center space-x-2">
+          <Satellite size={24} />
+          <div>
+            <h2 className="text-xl font-bold">{satellite.name}</h2>
+          </div>
+        </div>
+        <Button
+          onClick={onClose}
+          variant={"ghost"}
+          className="cursor-pointer bg-transparent text-white hover:bg-white/10 hover:text-white"
+        >
+          <X size={20} />
+        </Button>
+      </CardHeader>
+      <CardContent className="flex-1">
+        {/* Status Bar */}
+        <div className="mb-4 flex items-center space-x-2 rounded-lg bg-green-50 p-3">
+          <div className="h-2 w-2 rounded-full bg-green-500"></div>
+          <span className="text-sm font-medium text-green-800">
+            Live Tracking - {satellite.timestamp?.toLocaleTimeString()}
+          </span>
+        </div>
+
+        {/* Position Section */}
+        <div className="mb-4">
+          <div className="mb-2 flex items-center space-x-2">
+            <Globe className="text-blue-600" size={18} />
+            <h3 className="font-semibold text-gray-800">Position</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-2 rounded border border-blue-100 bg-blue-50 p-2">
+              <p className="text-xs font-medium text-blue-600">Latitude</p>
+              <p className="font-mono text-sm text-blue-800">
+                {formatNumber(satellite.lat, 4)}°
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 rounded border border-blue-100 bg-blue-50 p-2">
+              <p className="text-xs font-medium text-blue-600">Longitude</p>
+              <p className="font-mono text-sm text-blue-800">
+                {formatNumber(satellite.lon, 4)}°
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 rounded border border-purple-100 bg-purple-50 p-2">
+              <p className="text-xs font-medium text-purple-600">Altitude</p>
+              <p className="font-mono text-sm text-purple-800">
+                {formatNumber(satellite.altitude || 0)} km
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 rounded border border-purple-100 bg-purple-50 p-2">
+              <p className="text-xs font-medium text-purple-600">Velocity</p>
+              <p className="font-mono text-sm text-purple-800">
+                {formatNumber(satellite.velocity || 0)} km/s
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Orbit Parameters */}
+        <div className="mb-4">
+          <div className="mb-2 flex items-center space-x-2">
+            <Zap className="text-orange-600" size={18} />
+            <h3 className="font-semibold text-gray-800">Orbit</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-2 rounded border border-orange-100 bg-orange-50 p-2">
+              <p className="text-xs font-medium text-orange-600">Inclination</p>
+              <p className="font-mono text-sm text-orange-800">
+                {formatNumber(satellite.orbitData?.inclination || 0)}°
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 rounded border border-orange-100 bg-orange-50 p-2">
+              <p className="text-xs font-medium text-orange-600">
+                Eccentricity
+              </p>
+              <p className="font-mono text-sm text-orange-800">
+                {formatNumber(satellite.orbitData?.eccentricity || 0, 6)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3">
+          <h4 className="mb-2 text-sm font-semibold text-indigo-800">
+            Quick Stats
+          </h4>
+          <div className="grid grid-cols-4 gap-2 text-center">
             <div>
-              <h2 className="text-2xl font-bold">{satellite.name}</h2>
-              <p className="text-blue-100">ID: {satellite.id}</p>
+              <p className="text-lg font-bold text-indigo-600">
+                {satellite.orbitData?.meanMotion
+                  ? Math.round(satellite.orbitData.meanMotion * 10) / 10
+                  : "N/A"}
+              </p>
+              <p className="text-xs text-indigo-600">Rev/Day</p>
+            </div>
+            <div>
+              <p className="text-lg font-bold text-purple-600">
+                {satellite.orbitData?.period
+                  ? Math.round(1440 / satellite.orbitData.period)
+                  : 0}
+              </p>
+              <p className="text-xs text-purple-600">Orbits</p>
+            </div>
+            <div>
+              <p className="text-lg font-bold text-pink-600">
+                {formatNumber((satellite.velocity || 0) * 3600, 0)}
+              </p>
+              <p className="text-xs text-pink-600">km/h</p>
+            </div>
+            <div>
+              <p className="text-lg font-bold text-red-600">
+                {satellite.altitude !== undefined
+                  ? formatNumber((satellite.altitude / 6371) * 100, 1)
+                  : 0}
+                %
+              </p>
+              <p className="text-xs text-red-600">Earth Rad</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-white transition-colors hover:text-gray-200"
+        </div>
+      </CardContent>
+      <CardFooter className="pb-4">
+        {onShowOrbit && (
+          <Button
+            onClick={() => onShowOrbit(satellite.id)}
+            className="w-full bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700"
           >
-            <X size={24} />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6">
-          {/* Real-time Status */}
-          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4">
-            <div className="mb-2 flex items-center space-x-2">
-              <div className="h-3 w-3 animate-pulse rounded-full bg-green-500"></div>
-              <h3 className="text-lg font-semibold text-green-800">
-                Live Tracking
-              </h3>
-            </div>
-            <p className="text-sm text-green-700">
-              Last updated: {satellite.timestamp?.toLocaleString()}
-            </p>
-          </div>
-
-          {/* Current Position */}
-          <div className="mb-6">
-            <div className="mb-3 flex items-center space-x-2">
-              <Globe className="text-blue-600" size={20} />
-              <h3 className="text-lg font-semibold text-gray-800">
-                Current Position
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                <p className="text-sm font-medium text-blue-600">Latitude</p>
-                <p className="font-mono text-xl text-blue-800">
-                  {formatNumber(satellite.lat, 4)}°
-                </p>
-              </div>
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                <p className="text-sm font-medium text-blue-600">Longitude</p>
-                <p className="font-mono text-xl text-blue-800">
-                  {formatNumber(satellite.lon, 4)}°
-                </p>
-              </div>
-              <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
-                <p className="text-sm font-medium text-purple-600">Altitude</p>
-                <p className="font-mono text-xl text-purple-800">
-                  {formatNumber(satellite.altitude || 0)} km
-                </p>
-              </div>
-              <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
-                <p className="text-sm font-medium text-purple-600">Velocity</p>
-                <p className="font-mono text-xl text-purple-800">
-                  {formatNumber(satellite.velocity || 0)} km/s
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Orbital Parameters */}
-          <div className="mb-6">
-            <div className="mb-3 flex items-center space-x-2">
-              <Zap className="text-orange-600" size={20} />
-              <h3 className="text-lg font-semibold text-gray-800">
-                Orbital Elements
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
-                <p className="text-sm font-medium text-orange-600">
-                  Inclination
-                </p>
-                <p className="font-mono text-lg text-orange-800">
-                  {formatNumber(satellite.orbitData?.inclination || 0)}°
-                </p>
-                <p className="mt-1 text-xs text-orange-600">
-                  Orbit angle to equator
-                </p>
-              </div>
-              <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
-                <p className="text-sm font-medium text-orange-600">
-                  Eccentricity
-                </p>
-                <p className="font-mono text-lg text-orange-800">
-                  {formatNumber(satellite.orbitData?.eccentricity || 0, 6)}
-                </p>
-                <p className="mt-1 text-xs text-orange-600">
-                  Orbit shape (0 = circular)
-                </p>
-              </div>
-              <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
-                <p className="text-sm font-medium text-orange-600">
-                  Semi-Major Axis
-                </p>
-                <p className="font-mono text-lg text-orange-800">
-                  {formatNumber(satellite.orbitData?.semiMajorAxis || 0)} km
-                </p>
-                <p className="mt-1 text-xs text-orange-600">
-                  Average orbital radius
-                </p>
-              </div>
-              <div className="rounded-lg border border-teal-200 bg-teal-50 p-4">
-                <p className="text-sm font-medium text-teal-600">Apogee</p>
-                <p className="font-mono text-lg text-teal-800">
-                  {formatNumber(satellite.orbitData?.apogee || 0)} km
-                </p>
-                <p className="mt-1 text-xs text-teal-600">
-                  Farthest point from Earth
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Additional Information */}
-          <div className="mb-6">
-            <div className="mb-3 flex items-center space-x-2">
-              <Clock className="text-gray-600" size={20} />
-              <h3 className="text-lg font-semibold text-gray-800">
-                Mission Information
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                <p className="text-sm font-medium text-gray-600">Status</p>
-                <div className="flex items-center space-x-2">
-                  <div
-                    className={`h-2 w-2 rounded-full ${
-                      satellite.status === "Active"
-                        ? "bg-green-500"
-                        : "bg-red-500"
-                    }`}
-                  ></div>
-                  <p className="text-lg text-gray-800">{satellite.status}</p>
-                </div>
-              </div>
-              {satellite.launchDate && (
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                  <p className="text-sm font-medium text-gray-600">
-                    Launch Year
-                  </p>
-                  <p className="text-lg text-gray-800">
-                    {satellite.launchDate}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Orbit Statistics */}
-          {/* Orbit Statistics */}
-          <div className="rounded-lg border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4">
-            <h4 className="mb-2 font-semibold text-indigo-800">Quick Stats</h4>
-            <div className="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
-              <div>
-                <p className="text-2xl font-bold text-indigo-600">
-                  {formatNumber(satellite.orbitData?.meanMotion ?? 0, 2)}
-                </p>
-                <p className="text-xs text-indigo-600">Revolutions/day</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-purple-600">
-                  {satellite.orbitData?.period
-                    ? Math.round(1440 / satellite.orbitData.period)
-                    : 0}
-                </p>
-                <p className="text-xs text-purple-600">Orbits/day</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-pink-600">
-                  {formatNumber((satellite.velocity ?? 0) * 3600, 0)}
-                </p>
-                <p className="text-xs text-pink-600">km/hour</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-red-600">
-                  {satellite.altitude !== undefined
-                    ? formatNumber((satellite.altitude / 6371) * 100, 1)
-                    : 0}
-                  %
-                </p>
-                <p className="text-xs text-red-600">of Earth radius</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between rounded-b-lg border-t bg-gray-50 p-6">
-          <div className="text-sm text-gray-600">
-            TLE data provides real-time orbital tracking
-          </div>
-          <div className="flex space-x-3">
-            {onShowOrbit && (
-              <button
-                onClick={() => onShowOrbit(satellite.id)}
-                className="rounded bg-purple-600 px-4 py-2 text-white transition-colors hover:bg-purple-700"
-              >
-                Show Orbit
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              className="rounded bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+            Visualize Orbit
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
   );
 };
 

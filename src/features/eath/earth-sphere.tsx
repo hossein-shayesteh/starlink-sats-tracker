@@ -70,7 +70,7 @@ const EarthSphere = () => {
     const positions: SatellitePosition[] = [];
 
     // Limit to first 100 satellites for performance
-    const limitedRecords = satelliteRecords.slice(0, 100);
+    const limitedRecords = satelliteRecords.slice(0, 1000);
 
     limitedRecords.forEach((satrec) => {
       try {
@@ -200,7 +200,7 @@ const EarthSphere = () => {
   return (
     <>
       {/* Satellite Count Display */}
-      <div className="bg-opacity-90 absolute top-4 right-4 z-10 rounded-lg bg-black p-3 text-white">
+      <div className="bg-opacity-90 absolute top-4 left-4 z-10 rounded-lg bg-black p-3 text-white">
         <div className="text-center">
           <div className="text-3xl font-bold text-blue-400">
             {satellites.length}

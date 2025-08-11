@@ -2,7 +2,7 @@ import React from "react";
 
 import { Clock, Globe, Satellite, X, Zap } from "lucide-react";
 
-import { SatellitePosition } from "@/src/features/eath/utils/tle-parser";
+import { SatellitePosition } from "@/src/features/eath/components/satellite";
 
 interface SatelliteModalProps {
   satellite: SatellitePosition | null;
@@ -54,7 +54,7 @@ const SatelliteModal = ({
               </h3>
             </div>
             <p className="text-sm text-green-700">
-              Last updated: {satellite.timestamp.toLocaleString()}
+              Last updated: {satellite.timestamp?.toLocaleString()}
             </p>
           </div>
 
@@ -82,13 +82,13 @@ const SatelliteModal = ({
               <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
                 <p className="text-sm font-medium text-purple-600">Altitude</p>
                 <p className="font-mono text-xl text-purple-800">
-                  {formatNumber(satellite.altitude)} km
+                  {formatNumber(satellite.altitude || 0)} km
                 </p>
               </div>
               <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
                 <p className="text-sm font-medium text-purple-600">Velocity</p>
                 <p className="font-mono text-xl text-purple-800">
-                  {formatNumber(satellite.velocity)} km/s
+                  {formatNumber(satellite.velocity || 0)} km/s
                 </p>
               </div>
             </div>
@@ -108,7 +108,7 @@ const SatelliteModal = ({
                   Inclination
                 </p>
                 <p className="font-mono text-lg text-orange-800">
-                  {formatNumber(satellite.orbitData.inclination)}°
+                  {formatNumber(satellite.orbitData?.inclination || 0)}°
                 </p>
                 <p className="mt-1 text-xs text-orange-600">
                   Orbit angle to equator
@@ -119,7 +119,7 @@ const SatelliteModal = ({
                   Eccentricity
                 </p>
                 <p className="font-mono text-lg text-orange-800">
-                  {formatNumber(satellite.orbitData.eccentricity, 6)}
+                  {formatNumber(satellite.orbitData?.eccentricity || 0, 6)}
                 </p>
                 <p className="mt-1 text-xs text-orange-600">
                   Orbit shape (0 = circular)
@@ -130,7 +130,7 @@ const SatelliteModal = ({
                   Semi-Major Axis
                 </p>
                 <p className="font-mono text-lg text-orange-800">
-                  {formatNumber(satellite.orbitData.semiMajorAxis)} km
+                  {formatNumber(satellite.orbitData?.semiMajorAxis || 0)} km
                 </p>
                 <p className="mt-1 text-xs text-orange-600">
                   Average orbital radius
@@ -139,7 +139,7 @@ const SatelliteModal = ({
               <div className="rounded-lg border border-teal-200 bg-teal-50 p-4">
                 <p className="text-sm font-medium text-teal-600">Apogee</p>
                 <p className="font-mono text-lg text-teal-800">
-                  {formatNumber(satellite.orbitData.apogee)} km
+                  {formatNumber(satellite.orbitData?.apogee || 0)} km
                 </p>
                 <p className="mt-1 text-xs text-teal-600">
                   Farthest point from Earth
@@ -184,30 +184,36 @@ const SatelliteModal = ({
           </div>
 
           {/* Orbit Statistics */}
+          {/* Orbit Statistics */}
           <div className="rounded-lg border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-4">
             <h4 className="mb-2 font-semibold text-indigo-800">Quick Stats</h4>
             <div className="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
               <div>
                 <p className="text-2xl font-bold text-indigo-600">
-                  {formatNumber(satellite.orbitData.meanMotion, 2)}
+                  {formatNumber(satellite.orbitData?.meanMotion ?? 0, 2)}
                 </p>
                 <p className="text-xs text-indigo-600">Revolutions/day</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-purple-600">
-                  {Math.round(1440 / satellite.orbitData.period)}
+                  {satellite.orbitData?.period
+                    ? Math.round(1440 / satellite.orbitData.period)
+                    : 0}
                 </p>
                 <p className="text-xs text-purple-600">Orbits/day</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-pink-600">
-                  {formatNumber(satellite.velocity * 3600, 0)}
+                  {formatNumber((satellite.velocity ?? 0) * 3600, 0)}
                 </p>
                 <p className="text-xs text-pink-600">km/hour</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-red-600">
-                  {formatNumber((satellite.altitude / 6371) * 100, 1)}%
+                  {satellite.altitude !== undefined
+                    ? formatNumber((satellite.altitude / 6371) * 100, 1)
+                    : 0}
+                  %
                 </p>
                 <p className="text-xs text-red-600">of Earth radius</p>
               </div>

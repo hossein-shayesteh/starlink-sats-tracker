@@ -73,10 +73,7 @@ const EarthSphere = () => {
     const currentTime = new Date();
     const positions: SatellitePosition[] = [];
 
-    // Limit to first 100 satellites for performance
-    const limitedRecords = satelliteRecords;
-
-    limitedRecords.forEach((satrec) => {
+    satelliteRecords.forEach((satrec) => {
       try {
         const positionAndVelocity = satellite.propagate(satrec, currentTime);
 
@@ -150,14 +147,14 @@ const EarthSphere = () => {
       lastUpdateRef.current = now;
     }
 
-    // Update visible satellites at 30 FPS
+    // Update visible satellites at 60 FPS
     setSatellites((prev) => {
       return prev.map((sat, i) => {
         const newSat = positionsRef.current[i];
         if (!newSat) return sat;
 
         // Simple interpolation for smooth movement
-        const factor = 0.15;
+        const factor = 1 / 60;
         return {
           ...sat,
           lat: sat.lat + (newSat.lat - sat.lat) * factor,

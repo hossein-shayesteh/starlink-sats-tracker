@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Satellite Tracking Visualization
 
-## Getting Started
+![3D Earth Visualization](./public/demo.png)
 
-First, run the development server:
+Real-time 3D visualization of Earth with live Starlink satellite positions using Three.js and Next.js.
+
+## Features
+
+- 🌍 Interactive 3D Earth rendering with cloud animations
+- 🛰️ Live satellite positions updated from NORAD data
+- 📊 Detailed satellite information panels
+- 🔍 Multiple visualization modes (political/geographical)
+- ⚡ Real-time data updates
+
+## Installation
+
+1. Clone repository:
+
+```bash
+git clone https://github.com/yourusername/satellite-tracker.git
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Run development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Data Sources
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Satellite TLE Data: [CelesTrak](http://celestrak.org/NORAD/elements/)
+- GeoJSON Boundaries: [Natural Earth GeoJSON](https://github.com/martynafford/natural-earth-geojson)
 
-## Learn More
+## Technologies
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js
+- Three.js
+- React Three Fiber
+- TypeScript
+- Tailwind CSS
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/public/TLE` - Contains satellite TLE data files
+- `/public/geojson` - Contains Earth boundary GeoJSON files
+- `/public/textures` - Earth texture maps for day, night, and clouds

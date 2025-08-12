@@ -29,9 +29,12 @@ const EarthSphere = () => {
   const positionsRef = useRef<SatellitePosition[]>([]);
   const animationRef = useRef<number | null>(null);
 
-  // Load TLE data from file
   const loadTLEFromFile = useCallback(async () => {
     try {
+      // Fetch TLE form celestrak
+      // const response = await fetch("http://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=tle");
+
+      // Fetch TLE data from file
       const response = await fetch("/TLE/starlink.txt");
       if (!response.ok) {
         throw new Error(`Failed to load TLE file: ${response.status}`);

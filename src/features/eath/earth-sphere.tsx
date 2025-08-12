@@ -41,6 +41,7 @@ const EarthSphere = () => {
       const tleLines = tleContent.trim().split("\n");
       const records: satellite.SatRec[] = [];
 
+      // Process all TLE data
       for (let i = 0; i < tleLines.length; i += 3) {
         if (i + 2 >= tleLines.length) break;
 
@@ -70,7 +71,7 @@ const EarthSphere = () => {
     const positions: SatellitePosition[] = [];
 
     // Limit to first 100 satellites for performance
-    const limitedRecords = satelliteRecords.slice(0, 1000);
+    const limitedRecords = satelliteRecords;
 
     limitedRecords.forEach((satrec) => {
       try {
@@ -92,6 +93,11 @@ const EarthSphere = () => {
         const longitude = positionGd.longitude * (180 / Math.PI);
         const latitude = positionGd.latitude * (180 / Math.PI);
         const altitude = positionGd.height;
+
+        // Validate coordinates
+        if (isNaN(longitude) || isNaN(latitude) || isNaN(altitude)) {
+          return;
+        }
 
         // Calculate velocity magnitude
         let velocity = 0;
@@ -216,10 +222,13 @@ const EarthSphere = () => {
       <div className="h-screen w-screen">
         <Canvas
           camera={{ position: [0, 0, 5], fov: 75 }}
-          gl={{ antialias: true, powerPreference: "high-performance" }}
+          gl={{
+            antialias: false,
+            powerPreference: "high-performance",
+          }}
         >
           {/* Fog */}
-          <fog attach="fog" args={[0x000000, 1, 100]} />
+          {/*<fog attach="fog" args={[0x000000, 1, 100]} />*/}
 
           {/* Earth */}
           <Earth fill={true} />
@@ -229,7 +238,7 @@ const EarthSphere = () => {
             <Satellite
               satellites={satellites}
               radius={2.01}
-              pointSize={0.002}
+              pointSize={0.001}
               color="#00ff88"
               onSatelliteClick={handleSatelliteClick}
             />
@@ -241,11 +250,14 @@ const EarthSphere = () => {
 
           {/* Controls */}
           <OrbitControls
-            minDistance={2.1}
+            minDistance={2.12}
             maxDistance={10}
-            rotateSpeed={0.1}
+            rotateSpeed={0.08}
             enableDamping={true}
-            dampingFactor={0.05}
+            dampingFactor={0.03}
+            enablePan={false}
+            maxPolarAngle={Math.PI}
+            minPolarAngle={0}
           />
         </Canvas>
       </div>

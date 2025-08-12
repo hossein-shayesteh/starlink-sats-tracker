@@ -1,4 +1,4 @@
-# Satellite Tracking Visualization
+# Starlink Satellite Tracker
 
 ![3D Earth Visualization](./public/demo.png)
 
@@ -17,7 +17,7 @@ Real-time 3D visualization of Earth with live Starlink satellite positions using
 1. Clone repository:
 
 ```bash
-git clone https://github.com/yourusername/satellite-tracker.git
+https://github.com/hossein-shayesteh/starlink-sats-tracker.git
 ```
 
 2. Install dependencies:

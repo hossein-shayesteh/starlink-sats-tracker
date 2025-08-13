@@ -17,18 +17,21 @@ import Starfield from "@/src/features/eath/components/starfield";
 const StaticNebula = memo(Nebula);
 const StaticStarfield = memo(Starfield);
 
+interface SatelitesInfo {
+  name: string;
+  satrec: satellite.SatRec;
+}
+
 const EarthSphere = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [satellites, setSatellites] = useState<SatellitePosition[]>([]);
-  const [satelliteRecords, setSatelliteRecords] = useState<satellite.SatRec[]>(
-    [],
-  );
+  const [satellitesInfo, setSatellitesInfo] = useState<SatelitesInfo[]>([]);
   const [selectedSatellite, setSelectedSatellite] =
     useState<SatellitePosition | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const lastUpdateRef = useRef<number>(0);
-  const positionsRef = useRef<SatellitePosition[]>([]);
   const animationRef = useRef<number | null>(null);
+  const positionsRef = useRef<SatellitePosition[]>([]);
 
   const loadTLEFromFile = useCallback(async () => {
     try {
@@ -43,7 +46,7 @@ const EarthSphere = () => {
 
       const tleContent = await response.text();
       const tleLines = tleContent.trim().split("\n");
-      const records: satellite.SatRec[] = [];
+      const info: SatelitesInfo[] = [];
 
       // Process all TLE data
       for (let i = 0; i < tleLines.length; i += 3) {
@@ -55,13 +58,13 @@ const EarthSphere = () => {
 
         try {
           const satrec = satellite.twoline2satrec(line1, line2);
-          records.push(satrec);
+          info.push({ name, satrec });
         } catch (error) {
           console.error(`Error parsing TLE for ${name}:`, error);
         }
       }
 
-      setSatelliteRecords(records);
+      setSatellitesInfo(info);
     } catch (error) {
       console.error("Error loading TLE data:", error);
     }
@@ -69,12 +72,12 @@ const EarthSphere = () => {
 
   // Calculate satellite positions using satellite-js
   const updateSatellitePositions = useCallback(() => {
-    if (satelliteRecords.length === 0) return;
+    if (satellitesInfo.length === 0) return;
 
     const currentTime = new Date();
     const positions: SatellitePosition[] = [];
 
-    satelliteRecords.forEach((satrec) => {
+    satellitesInfo.forEach(({ name, satrec }) => {
       try {
         const positionAndVelocity = satellite.propagate(satrec, currentTime);
 
@@ -117,7 +120,7 @@ const EarthSphere = () => {
           lon: longitude,
           altitude,
           velocity,
-          name: `STARLINK`,
+          name,
           id: satrec.satnum.toString(),
           timestamp: currentTime,
           orbitData: {
@@ -138,7 +141,7 @@ const EarthSphere = () => {
     });
 
     positionsRef.current = positions;
-  }, [satelliteRecords]);
+  }, [satellitesInfo]);
 
   // Animation loop for efficient updates
   const animate = useCallback(() => {
@@ -177,7 +180,7 @@ const EarthSphere = () => {
 
   // Start animation when satellite records are loaded
   useEffect(() => {
-    if (satelliteRecords.length > 0) {
+    if (satellitesInfo.length > 0) {
       // Initialize positions
       updateSatellitePositions();
       setSatellites(positionsRef.current);
@@ -190,7 +193,7 @@ const EarthSphere = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [satelliteRecords, animate, updateSatellitePositions]);
+  }, [satellitesInfo, animate, updateSatellitePositions]);
 
   const handleSatelliteClick = (satellite: SatellitePosition) => {
     setSelectedSatellite(satellite);
@@ -241,7 +244,7 @@ const EarthSphere = () => {
             <Satellite
               satellites={satellites}
               radius={2.01}
-              pointSize={0.001}
+              pointSize={0.002}
               color="#00ff88"
               onSatelliteClick={handleSatelliteClick}
             />

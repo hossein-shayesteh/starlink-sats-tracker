@@ -25,6 +25,7 @@ const EarthSphere = () => {
   const [selectedSatellite, setSelectedSatellite] =
     useState<SatellitePosition | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const lastUpdateRef = useRef<number>(0);
   const positionsRef = useRef<SatellitePosition[]>([]);
   const animationRef = useRef<number | null>(null);
@@ -78,8 +79,7 @@ const EarthSphere = () => {
         const positionAndVelocity = satellite.propagate(satrec, currentTime);
 
         if (
-          !positionAndVelocity ||
-          !positionAndVelocity.position ||
+          !positionAndVelocity?.position ||
           typeof positionAndVelocity.position === "boolean"
         ) {
           return;
@@ -104,28 +104,31 @@ const EarthSphere = () => {
         if (positionAndVelocity.velocity) {
           const velocityEci = positionAndVelocity.velocity;
           velocity = Math.sqrt(
-            velocityEci.x * velocityEci.x +
-              velocityEci.y * velocityEci.y +
-              velocityEci.z * velocityEci.z,
+            velocityEci.x ** 2 + velocityEci.y ** 2 + velocityEci.z ** 2,
           );
         }
+
+        // Calculate orbital parameters
+        const semiMajorAxis = satrec.a * 6378.135; // Earth radii to km
+        const eccentricity = satrec.ecco;
 
         positions.push({
           lat: latitude,
           lon: longitude,
           altitude,
           velocity,
-          name: `STARLINK-${satrec.satnum.toString()}`,
+          name: `STARLINK`,
           id: satrec.satnum.toString(),
           timestamp: currentTime,
           orbitData: {
-            inclination: satrec.inclo * (180 / Math.PI),
-            eccentricity: satrec.ecco,
-            semiMajorAxis: 0,
-            period: 0,
-            perigee: 0,
-            apogee: 0,
-            meanMotion: 0,
+            inclination: satrec.inclo * (180 / Math.PI), // degrees
+            eccentricity,
+            semiMajorAxis,
+            period: (2 * Math.PI) / satrec.no, // minutes
+            perigee: satrec.argpo * (180 / Math.PI), // degrees
+            apogee: semiMajorAxis * (1 + eccentricity),
+            meanAnomaly: satrec.mo * (180 / Math.PI), // degrees
+            meanMotion: satrec.no * (1440 / (2 * Math.PI)), // revolutions per day
           },
           status: "Active",
         });

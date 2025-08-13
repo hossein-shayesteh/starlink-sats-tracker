@@ -1,4 +1,4 @@
-import { Globe, Satellite, X, Zap } from "lucide-react";
+import { Globe, Rotate3D, Satellite, X } from "lucide-react";
 
 import { SatellitePosition } from "@/src/features/eath/components/satellite";
 
@@ -37,6 +37,7 @@ const SatelliteModal = ({
           <Satellite size={24} />
           <div>
             <h2 className="text-xl font-bold">{satellite.name}</h2>
+            <div className="text-sm">NORAD ID: {satellite.id}</div>
           </div>
         </div>
         <Button
@@ -93,14 +94,14 @@ const SatelliteModal = ({
         {/* Orbit Parameters */}
         <div className="mb-4">
           <div className="mb-2 flex items-center space-x-2">
-            <Zap className="text-orange-600" size={18} />
+            <Rotate3D className="text-orange-600" size={18} />
             <h3 className="font-semibold text-gray-800">Orbit</h3>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col gap-2 rounded border border-orange-100 bg-orange-50 p-2">
               <p className="text-xs font-medium text-orange-600">Inclination</p>
               <p className="font-mono text-sm text-orange-800">
-                {formatNumber(satellite.orbitData?.inclination || 0)}°
+                {formatNumber(satellite.orbitData?.inclination || 0, 4)}°
               </p>
             </div>
             <div className="flex flex-col gap-2 rounded border border-orange-100 bg-orange-50 p-2">
@@ -111,45 +112,41 @@ const SatelliteModal = ({
                 {formatNumber(satellite.orbitData?.eccentricity || 0, 6)}
               </p>
             </div>
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50 p-3">
-          <h4 className="mb-2 text-sm font-semibold text-indigo-800">
-            Quick Stats
-          </h4>
-          <div className="grid grid-cols-4 gap-2 text-center">
-            <div>
-              <p className="text-lg font-bold text-indigo-600">
-                {satellite.orbitData?.meanMotion
-                  ? Math.round(satellite.orbitData.meanMotion * 10) / 10
-                  : "N/A"}
+            <div className="flex flex-col gap-2 rounded border border-orange-100 bg-orange-50 p-2">
+              <p className="text-xs font-medium text-orange-600">
+                Semi-Major Axis
               </p>
-              <p className="text-xs text-indigo-600">Rev/Day</p>
+              <p className="font-mono text-sm text-orange-800">
+                {formatNumber(satellite.orbitData?.semiMajorAxis || 0)} km
+              </p>
             </div>
-            <div>
-              <p className="text-lg font-bold text-purple-600">
-                {satellite.orbitData?.period
-                  ? Math.round(1440 / satellite.orbitData.period)
-                  : 0}
+            <div className="flex flex-col gap-2 rounded border border-orange-100 bg-orange-50 p-2">
+              <p className="text-xs font-medium text-orange-600">period</p>
+              <p className="font-mono text-sm text-orange-800">
+                {formatNumber(satellite.orbitData?.period || 0)} min
               </p>
-              <p className="text-xs text-purple-600">Orbits</p>
             </div>
-            <div>
-              <p className="text-lg font-bold text-pink-600">
-                {formatNumber((satellite.velocity || 0) * 3600, 0)}
+            <div className="flex flex-col gap-2 rounded border border-orange-100 bg-orange-50 p-2">
+              <p className="text-xs font-medium text-orange-600">
+                Argument of Perigee
               </p>
-              <p className="text-xs text-pink-600">km/h</p>
+              <p className="font-mono text-sm text-orange-800">
+                {formatNumber(satellite.orbitData?.perigee || 0, 4)}°
+              </p>
             </div>
-            <div>
-              <p className="text-lg font-bold text-red-600">
-                {satellite.altitude !== undefined
-                  ? formatNumber((satellite.altitude / 6371) * 100, 1)
-                  : 0}
-                %
+            <div className="flex flex-col gap-2 rounded border border-orange-100 bg-orange-50 p-2">
+              <p className="text-xs font-medium text-orange-600">
+                Mean Anormaly
               </p>
-              <p className="text-xs text-red-600">Earth Rad</p>
+              <p className="font-mono text-sm text-orange-800">
+                {formatNumber(satellite.orbitData?.meanAnomaly || 0, 4)}°
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 rounded border border-orange-100 bg-orange-50 p-2">
+              <p className="text-xs font-medium text-orange-600">Mean Motion</p>
+              <p className="font-mono text-sm text-orange-800">
+                {formatNumber(satellite.orbitData?.meanMotion || 0, 6)} rev/day
+              </p>
             </div>
           </div>
         </div>
@@ -160,7 +157,7 @@ const SatelliteModal = ({
             onClick={() => onShowOrbit(satellite.id)}
             className="w-full bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700"
           >
-            Visualize Orbit
+            Show Orbit
           </Button>
         )}
       </CardFooter>

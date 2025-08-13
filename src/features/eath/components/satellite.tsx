@@ -26,6 +26,7 @@ interface SatellitePosition {
     period: number;
     perigee: number;
     apogee: number;
+    meanAnomaly: number;
     meanMotion: number;
   };
   status?: string;

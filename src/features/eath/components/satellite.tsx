@@ -9,37 +9,18 @@ import React, {
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
+import { SatellitePosition } from "@/src/features/eath/types";
 import { convertToSphereCoords } from "@/src/features/eath/utils/geojsonUtils";
-
-interface SatellitePosition {
-  lat: number;
-  lon: number;
-  name?: string;
-  id: string;
-  altitude?: number;
-  velocity?: number;
-  timestamp?: Date;
-  orbitData?: {
-    inclination: number;
-    eccentricity: number;
-    semiMajorAxis: number;
-    period: number;
-    perigee: number;
-    apogee: number;
-    meanAnomaly: number;
-    meanMotion: number;
-  };
-  status?: string;
-  launchDate?: string;
-}
 
 interface SatelliteProps {
   satellites: SatellitePosition[];
   radius?: number;
   pointSize?: number;
   color?: string | THREE.Color;
+  hoverColor?: string | THREE.Color;
+  selectedColor?: string | THREE.Color;
+  selectedSatelliteId?: string | null;
   onSatelliteClick?: (satellite: SatellitePosition) => void;
-  selectedOrbitId?: string | null;
 }
 
 const Satellite = ({
@@ -47,49 +28,53 @@ const Satellite = ({
   radius = 3,
   pointSize = 0.02,
   color = "#ff4444",
+  hoverColor = "#ffaa00",
+  selectedColor = "#ff0000",
+  selectedSatelliteId,
   onSatelliteClick,
-  selectedOrbitId,
 }: SatelliteProps) => {
   const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
+  const glowRingRef = useRef<THREE.Mesh>(null);
   const raycaster = useRef(new THREE.Raycaster());
   const mouse = useRef(new THREE.Vector2());
   const [hoveredIndex, setHoveredIndex] = useState<number>(-1);
   const tempObject = useRef(new THREE.Object3D());
-  const colorAttributeRef = useRef<THREE.InstancedBufferAttribute | null>(null);
+  const colorRef = useRef(new THREE.Color());
 
-  // Convert color to THREE.Color if it's a string
-  const baseColor = useMemo(() => {
-    return typeof color === "string" ? new THREE.Color(color) : color;
-  }, [color]);
+  // Memoized colors
+  const baseColor = useMemo(
+    () => (typeof color === "string" ? new THREE.Color(color) : color),
+    [color],
+  );
+  const satelliteHoverColor = useMemo(
+    () => new THREE.Color(hoverColor),
+    [hoverColor],
+  );
+  const satelliteSelectedColor = useMemo(
+    () => new THREE.Color(selectedColor),
+    [selectedColor],
+  );
 
-  const hoverColor = useMemo(() => new THREE.Color("#ffaa00"), []);
-  const selectedColor = useMemo(() => new THREE.Color("#ff5500"), []);
-
-  // Filter valid satellites once and reuse
+  // Filter and memoize valid satellites
   const validSatellites = useMemo(() => {
     return satellites.filter(
       (satellite) =>
-        satellite &&
-        typeof satellite.lon === "number" &&
-        typeof satellite.lat === "number" &&
+        satellite?.lon != null &&
+        satellite?.lat != null &&
         !isNaN(satellite.lat) &&
-        !isNaN(satellite.lon),
+        !isNaN(satellite.lon) &&
+        Math.abs(satellite.lat) <= 90 &&
+        Math.abs(satellite.lon) <= 180,
     );
   }, [satellites]);
 
-  // Memoize satellite positions and setup instanced mesh
-  const colorArray = useMemo(() => {
-    const colors = new Float32Array(validSatellites.length * 3);
+  // Find selected satellite index
+  const selectedIndex = useMemo(() => {
+    if (!selectedSatelliteId) return -1;
+    return validSatellites.findIndex((sat) => sat.id === selectedSatelliteId);
+  }, [validSatellites, selectedSatelliteId]);
 
-    validSatellites.forEach((satellite, index) => {
-      // Set base color for each instance
-      baseColor.toArray(colors, index * 3);
-    });
-
-    return colors;
-  }, [validSatellites, baseColor]);
-
-  // Create geometry and material once
+  // Memoized geometry and materials
   const geometry = useMemo(
     () => new THREE.SphereGeometry(pointSize, 8, 6),
     [pointSize],
@@ -104,84 +89,119 @@ const Satellite = ({
     [],
   );
 
-  // Initialize color attribute
+  // Glow ring geometry and material for selected satellite
+  const glowGeometry = useMemo(
+    () => new THREE.RingGeometry(pointSize * 3, pointSize * 4, 16),
+    [pointSize],
+  );
+
+  const glowMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: satelliteSelectedColor,
+        transparent: true,
+        opacity: 0.6,
+        side: THREE.DoubleSide,
+      }),
+    [satelliteSelectedColor],
+  );
+
+  // Initialize instance colors once
   useEffect(() => {
-    if (instancedMeshRef.current && validSatellites.length > 0) {
-      const instancedMesh = instancedMeshRef.current;
-
-      // Create or update the instanceColor attribute
-      if (!instancedMesh.geometry.attributes.instanceColor) {
-        colorAttributeRef.current = new THREE.InstancedBufferAttribute(
-          colorArray,
-          3,
-          false,
-        );
-        instancedMesh.geometry.setAttribute(
-          "instanceColor",
-          colorAttributeRef.current,
-        );
-      } else {
-        colorAttributeRef.current = instancedMesh.geometry.attributes
-          .instanceColor as THREE.InstancedBufferAttribute;
-        colorAttributeRef.current.set(colorArray);
-        colorAttributeRef.current.needsUpdate = true;
-      }
-    }
-  }, [colorArray, validSatellites]);
-
-  // Update instance matrices and colors
-  useFrame(() => {
-    if (
-      !instancedMeshRef.current ||
-      validSatellites.length === 0 ||
-      !colorAttributeRef.current
-    )
-      return;
+    if (!instancedMeshRef.current || validSatellites.length === 0) return;
 
     const instancedMesh = instancedMeshRef.current;
+    const tempColor = new THREE.Color();
 
-    validSatellites.forEach((satellite, index) => {
+    for (let i = 0; i < validSatellites.length; i++) {
+      tempColor.copy(baseColor);
+      instancedMesh.setColorAt(i, tempColor);
+    }
+
+    instancedMesh.instanceColor!.needsUpdate = true;
+  }, [validSatellites.length, baseColor]);
+
+  // Animation frame updates
+  useFrame((state) => {
+    if (!instancedMeshRef.current || validSatellites.length === 0) return;
+
+    const instancedMesh = instancedMeshRef.current;
+    const time = state.clock.elapsedTime;
+
+    // Update satellite positions and colors
+    for (let i = 0; i < validSatellites.length; i++) {
+      const satellite = validSatellites[i];
       const [x, y, z] = convertToSphereCoords(
         [satellite.lon, satellite.lat],
         radius,
       );
 
+      // Update position
       tempObject.current.position.set(x, y, z);
 
-      // Scale up selected satellites
-      const scale = selectedOrbitId === satellite.id ? 1.5 : 1;
-      tempObject.current.scale.setScalar(scale);
+      // Determine scale and color based on state
+      const isHovered = i === hoveredIndex;
+      const isSelected = i === selectedIndex;
 
-      tempObject.current.updateMatrix();
-      instancedMesh.setMatrixAt(index, tempObject.current.matrix);
-
-      // Update colors based on hover and selection state
-      if (index === hoveredIndex) {
-        hoverColor.toArray(
-          colorAttributeRef.current!.array as Float32Array,
-          index * 3,
-        );
-      } else if (selectedOrbitId === satellite.id) {
-        selectedColor.toArray(
-          colorAttributeRef.current!.array as Float32Array,
-          index * 3,
-        );
-      } else {
-        baseColor.toArray(
-          colorAttributeRef.current!.array as Float32Array,
-          index * 3,
-        );
+      // Scale: selected > hovered > normal
+      let scale = 1;
+      if (isSelected) {
+        scale = 1.8 + Math.sin(time * 4) * 0.2; // Pulsing animation for selected
+      } else if (isHovered) {
+        scale = 1.5;
       }
-    });
 
+      tempObject.current.scale.setScalar(scale);
+      tempObject.current.updateMatrix();
+      instancedMesh.setMatrixAt(i, tempObject.current.matrix);
+
+      // Update color
+      if (isSelected) {
+        colorRef.current.copy(satelliteSelectedColor);
+        // Add slight brightness pulsing
+        const pulse = 0.8 + Math.sin(time * 3) * 0.2;
+        colorRef.current.multiplyScalar(pulse);
+      } else if (isHovered) {
+        colorRef.current.copy(satelliteHoverColor);
+      } else {
+        colorRef.current.copy(baseColor);
+      }
+      instancedMesh.setColorAt(i, colorRef.current);
+    }
+
+    // Update glow ring for selected satellite
+    if (glowRingRef.current && selectedIndex >= 0) {
+      const satellite = validSatellites[selectedIndex];
+      const [x, y, z] = convertToSphereCoords(
+        [satellite.lon, satellite.lat],
+        radius,
+      );
+
+      glowRingRef.current.position.set(x, y, z);
+      glowRingRef.current.lookAt(0, 0, 0); // Face the center (Earth)
+
+      // Animate the glow ring
+      const glowScale = 1 + Math.sin(time * 2) * 0.3;
+      glowRingRef.current.scale.setScalar(glowScale);
+
+      // Animate opacity
+      if (glowRingRef.current.material instanceof THREE.MeshBasicMaterial) {
+        glowRingRef.current.material.opacity = 0.4 + Math.sin(time * 3) * 0.2;
+      }
+
+      glowRingRef.current.visible = true;
+    } else if (glowRingRef.current) {
+      glowRingRef.current.visible = false;
+    }
+
+    // Mark for updates
     instancedMesh.instanceMatrix.needsUpdate = true;
-
-    if (colorAttributeRef.current) {
-      colorAttributeRef.current.needsUpdate = true;
+    if (instancedMesh.instanceColor) {
+      instancedMesh.instanceColor.needsUpdate = true;
     }
   });
 
-  // Fixed click handler with proper mouse coordinate calculation
+  // Optimized click handler
   const handleClick = useCallback(
     (event: ThreeEvent<MouseEvent>) => {
       if (
@@ -193,29 +213,39 @@ const Satellite = ({
 
       event.stopPropagation();
 
-      // Get the canvas element and its bounding rectangle
+      // Try to get instance ID from intersection
+      const intersection = event.intersections.find(
+        (int) =>
+          int.object === instancedMeshRef.current &&
+          int.instanceId !== undefined,
+      );
+
+      if (intersection?.instanceId !== undefined) {
+        const satellite = validSatellites[intersection.instanceId];
+        if (satellite) {
+          onSatelliteClick(satellite);
+          return;
+        }
+      }
+
+      // Fallback raycasting
       const canvas = event.nativeEvent.target as HTMLCanvasElement;
       const rect = canvas.getBoundingClientRect();
 
-      // Calculate normalized device coordinates (-1 to 1)
-      mouse.current.x =
-        ((event.nativeEvent.clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.current.y =
-        -((event.nativeEvent.clientY - rect.top) / rect.height) * 2 + 1;
+      mouse.current.set(
+        ((event.nativeEvent.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.nativeEvent.clientY - rect.top) / rect.height) * 2 + 1,
+      );
 
-      // Cast ray and find intersections
       raycaster.current.setFromCamera(mouse.current, event.camera);
-
-      // Increase raycaster threshold for better detection of small objects
-      raycaster.current.params.Points!.threshold = pointSize * 2;
+      raycaster.current.params.Points = { threshold: pointSize * 3 };
 
       const intersects = raycaster.current.intersectObject(
         instancedMeshRef.current,
       );
 
       if (intersects.length > 0 && intersects[0].instanceId !== undefined) {
-        const instanceId = intersects[0].instanceId;
-        const satellite = validSatellites[instanceId];
+        const satellite = validSatellites[intersects[0].instanceId];
         if (satellite) {
           onSatelliteClick(satellite);
         }
@@ -224,45 +254,30 @@ const Satellite = ({
     [validSatellites, onSatelliteClick, pointSize],
   );
 
-  // Fixed hover handler with proper mouse coordinate calculation
+  // Optimized hover handler
   const handlePointerMove = useCallback(
     (event: ThreeEvent<PointerEvent>) => {
       if (!instancedMeshRef.current || validSatellites.length === 0) return;
 
       event.stopPropagation();
 
-      // Get the canvas element and its bounding rectangle
-      const canvas = event.nativeEvent.target as HTMLCanvasElement;
-      const rect = canvas.getBoundingClientRect();
-
-      // Calculate normalized device coordinates (-1 to 1)
-      mouse.current.x =
-        ((event.nativeEvent.clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.current.y =
-        -((event.nativeEvent.clientY - rect.top) / rect.height) * 2 + 1;
-
-      // Cast ray and find intersections
-      raycaster.current.setFromCamera(mouse.current, event.camera);
-      raycaster.current.params.Points!.threshold = pointSize * 2;
-
-      const intersects = raycaster.current.intersectObject(
-        instancedMeshRef.current,
+      const intersection = event.intersections.find(
+        (int) =>
+          int.object === instancedMeshRef.current &&
+          int.instanceId !== undefined,
       );
 
-      if (intersects.length > 0 && intersects[0].instanceId !== undefined) {
-        const newHoveredIndex = intersects[0].instanceId;
-        if (newHoveredIndex !== hoveredIndex) {
-          setHoveredIndex(newHoveredIndex);
+      if (intersection?.instanceId !== undefined) {
+        if (intersection.instanceId !== hoveredIndex) {
+          setHoveredIndex(intersection.instanceId);
           document.body.style.cursor = "pointer";
         }
-      } else {
-        if (hoveredIndex !== -1) {
-          setHoveredIndex(-1);
-          document.body.style.cursor = "auto";
-        }
+      } else if (hoveredIndex !== -1) {
+        setHoveredIndex(-1);
+        document.body.style.cursor = "auto";
       }
     },
-    [hoveredIndex, validSatellites.length, pointSize],
+    [hoveredIndex, validSatellites.length],
   );
 
   const handlePointerLeave = useCallback(() => {
@@ -270,13 +285,13 @@ const Satellite = ({
     document.body.style.cursor = "auto";
   }, []);
 
-  // Don't render if no valid satellites
   if (validSatellites.length === 0) {
     return null;
   }
 
   return (
     <group rotation-x={-Math.PI * 0.5}>
+      {/* Main satellite instances */}
       <instancedMesh
         ref={instancedMeshRef}
         args={[geometry, material, validSatellites.length]}
@@ -285,9 +300,16 @@ const Satellite = ({
         onPointerLeave={handlePointerLeave}
         frustumCulled={false}
       />
+
+      {/* Glow ring for selected satellite */}
+      <mesh
+        ref={glowRingRef}
+        geometry={glowGeometry}
+        material={glowMaterial}
+        visible={false}
+      />
     </group>
   );
 };
 
 export default Satellite;
-export type { SatellitePosition };

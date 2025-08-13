@@ -8,11 +8,10 @@ import * as satellite from "satellite.js";
 
 import Earth from "@/src/features/eath/components/earth";
 import Nebula from "@/src/features/eath/components/nebula";
-import Satellite, {
-  SatellitePosition,
-} from "@/src/features/eath/components/satellite";
+import Satellite from "@/src/features/eath/components/satellite";
 import SatelliteModal from "@/src/features/eath/components/satellite-modal";
 import Starfield from "@/src/features/eath/components/starfield";
+import { SatellitePosition } from "@/src/features/eath/types";
 
 const StaticNebula = memo(Nebula);
 const StaticStarfield = memo(Starfield);
@@ -239,13 +238,14 @@ const EarthSphere = () => {
           {/* Earth */}
           <Earth fill={true} />
 
-          {/* Satellites - Only render if positions are valid */}
+          {/* Satellites */}
           {satellites.length > 0 && (
             <Satellite
               satellites={satellites}
               radius={2.01}
               pointSize={0.002}
               color="#00ff88"
+              selectedSatelliteId={selectedSatellite?.id || null}
               onSatelliteClick={handleSatelliteClick}
             />
           )}

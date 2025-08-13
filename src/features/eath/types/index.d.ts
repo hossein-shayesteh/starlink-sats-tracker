@@ -111,3 +111,25 @@ export interface Lines {
   points: [number, number, number][];
   id: string;
 }
+
+export interface SatellitePosition {
+  lat: number;
+  lon: number;
+  name?: string;
+  id: string;
+  altitude?: number;
+  velocity?: number;
+  timestamp?: Date;
+  orbitData?: {
+    inclination: number;
+    eccentricity: number;
+    semiMajorAxis: number;
+    period: number;
+    perigee: number;
+    apogee: number;
+    meanAnomaly: number;
+    meanMotion: number;
+  };
+  status?: string;
+  launchDate?: string;
+}

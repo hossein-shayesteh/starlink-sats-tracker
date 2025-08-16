@@ -2,6 +2,7 @@
 
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 
+import Orbit from "./components/orbit";
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import * as satellite from "satellite.js";
@@ -22,10 +23,11 @@ interface SatelitesInfo {
 }
 
 const EarthSphere = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [satellites, setSatellites] = useState<SatellitePosition[]>([]);
   const [satellitesInfo, setSatellitesInfo] = useState<SatelitesInfo[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const orbitInfo = useRef<SatelitesInfo | null>(null);
   const [selectedSatellite, setSelectedSatellite] =
     useState<SatellitePosition | null>(null);
 
@@ -205,10 +207,17 @@ const EarthSphere = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedSatellite(null);
+    orbitInfo.current = null;
   };
 
-  const handleShowOrbit = (_satelliteId: string) => {
-    // TODO: implement orbit visualization here
+  const handleShowOrbit = (satelliteId: string) => {
+    const satellite = satellitesInfo.find(
+      ({ satrec }) => satrec.satnum.toString() === satelliteId,
+    );
+
+    if (satellite) {
+      orbitInfo.current = satellite;
+    }
   };
 
   return (
@@ -256,6 +265,14 @@ const EarthSphere = () => {
           {/* Static background elements */}
           <StaticStarfield />
           <StaticNebula />
+
+          <Orbit
+            date={orbitInfo.current}
+            radius={2.01}
+            color="#69b3a6"
+            opacity={0.9}
+            width={10}
+          />
 
           {/* Controls */}
           <OrbitControls

@@ -33,13 +33,16 @@ const Satellite = ({
   selectedSatelliteId,
   onSatelliteClick,
 }: SatelliteProps) => {
-  const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
-  const glowRingRef = useRef<THREE.Mesh>(null);
-  const raycaster = useRef(new THREE.Raycaster());
   const mouse = useRef(new THREE.Vector2());
-  const [hoveredIndex, setHoveredIndex] = useState<number>(-1);
-  const tempObject = useRef(new THREE.Object3D());
   const colorRef = useRef(new THREE.Color());
+  const glowRingRef = useRef<THREE.Mesh>(null);
+  const selectionRadius = useRef(pointSize * 10);
+  const tempObject = useRef(new THREE.Object3D());
+  const raycaster = useRef(new THREE.Raycaster());
+  const clickTimeout = useRef<NodeJS.Timeout | null>(null);
+  const validSatellitesRef = useRef<SatellitePosition[]>([]);
+  const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number>(-1);
 
   // Memoized colors
   const baseColor = useMemo(
@@ -67,6 +70,10 @@ const Satellite = ({
         Math.abs(satellite.lon) <= 180,
     );
   }, [satellites]);
+
+  useEffect(() => {
+    validSatellitesRef.current = validSatellites;
+  }, [validSatellites]);
 
   // Find selected satellite index
   const selectedIndex = useMemo(() => {
@@ -213,45 +220,52 @@ const Satellite = ({
 
       event.stopPropagation();
 
-      // Try to get instance ID from intersection
-      const intersection = event.intersections.find(
-        (int) =>
-          int.object === instancedMeshRef.current &&
-          int.instanceId !== undefined,
-      );
+      // Prevent double clicks
+      if (clickTimeout.current) return;
+      clickTimeout.current = setTimeout(() => {
+        clickTimeout.current = null;
+      }, 300);
 
-      if (intersection?.instanceId !== undefined) {
-        const satellite = validSatellites[intersection.instanceId];
-        if (satellite) {
-          onSatelliteClick(satellite);
-          return;
+      let foundSatellite: SatellitePosition | null = null;
+
+      // Try direct intersection first
+      for (const intersection of event.intersections) {
+        if (
+          intersection.object === instancedMeshRef.current &&
+          intersection.instanceId !== undefined
+        ) {
+          foundSatellite = validSatellitesRef.current[intersection.instanceId];
+          break;
         }
       }
 
-      // Fallback raycasting
-      const canvas = event.nativeEvent.target as HTMLCanvasElement;
-      const rect = canvas.getBoundingClientRect();
+      if (!foundSatellite) {
+        const canvas = event.nativeEvent.target as HTMLCanvasElement;
+        const rect = canvas.getBoundingClientRect();
 
-      mouse.current.set(
-        ((event.nativeEvent.clientX - rect.left) / rect.width) * 2 - 1,
-        -((event.nativeEvent.clientY - rect.top) / rect.height) * 2 + 1,
-      );
+        mouse.current.set(
+          ((event.nativeEvent.clientX - rect.left) / rect.width) * 2 - 1,
+          -((event.nativeEvent.clientY - rect.top) / rect.height) * 2 + 1,
+        );
 
-      raycaster.current.setFromCamera(mouse.current, event.camera);
-      raycaster.current.params.Points = { threshold: pointSize * 3 };
+        raycaster.current.setFromCamera(mouse.current, event.camera);
+        raycaster.current.params.Mesh = { threshold: selectionRadius.current };
 
-      const intersects = raycaster.current.intersectObject(
-        instancedMeshRef.current,
-      );
+        const intersects = raycaster.current.intersectObject(
+          instancedMeshRef.current,
+          true,
+        );
 
-      if (intersects.length > 0 && intersects[0].instanceId !== undefined) {
-        const satellite = validSatellites[intersects[0].instanceId];
-        if (satellite) {
-          onSatelliteClick(satellite);
+        if (intersects.length > 0 && intersects[0].instanceId !== undefined) {
+          foundSatellite = validSatellitesRef.current[intersects[0].instanceId];
         }
+      }
+
+      if (foundSatellite) {
+        onSatelliteClick(foundSatellite);
       }
     },
-    [validSatellites, onSatelliteClick, pointSize],
+    [onSatelliteClick, validSatellites.length],
   );
 
   // Optimized hover handler
@@ -299,6 +313,7 @@ const Satellite = ({
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
         frustumCulled={false}
+        renderOrder={1000}
       />
 
       {/* Glow ring for selected satellite */}

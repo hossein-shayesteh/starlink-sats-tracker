@@ -25,6 +25,7 @@ const EarthSphere = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [satellites, setSatellites] = useState<SatellitePosition[]>([]);
   const [satellitesInfo, setSatellitesInfo] = useState<SatelitesInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedSatellite, setSelectedSatellite] =
     useState<SatellitePosition | null>(null);
 
@@ -33,6 +34,7 @@ const EarthSphere = () => {
   const positionsRef = useRef<SatellitePosition[]>([]);
 
   const loadTLEFromFile = useCallback(async () => {
+    setIsLoading(true);
     try {
       // Fetch TLE form celestrak
       // const response = await fetch("http://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=tle");
@@ -67,6 +69,7 @@ const EarthSphere = () => {
     } catch (error) {
       console.error("Error loading TLE data:", error);
     }
+    setIsLoading(false);
   }, []);
 
   // Calculate satellite positions using satellite-js
@@ -239,7 +242,7 @@ const EarthSphere = () => {
           <Earth fill={true} />
 
           {/* Satellites */}
-          {satellites.length > 0 && (
+          {satellites.length > 0 && !isLoading && (
             <Satellite
               satellites={satellites}
               radius={2.01}

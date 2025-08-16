@@ -255,7 +255,7 @@ const EarthSphere = () => {
             <Satellite
               satellites={satellites}
               radius={2.01}
-              pointSize={0.002}
+              pointSize={0.004}
               color="#00ff88"
               selectedSatelliteId={selectedSatellite?.id || null}
               onSatelliteClick={handleSatelliteClick}

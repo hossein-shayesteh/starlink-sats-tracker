@@ -59,6 +59,7 @@ const Orbit = memo(
           // Convert radians to degrees
           const longitude = positionGd.longitude * (180 / Math.PI);
           const latitude = positionGd.latitude * (180 / Math.PI);
+          const altitude = positionGd.height;
 
           // Validate coordinates
           if (
@@ -70,9 +71,10 @@ const Orbit = memo(
             continue;
           }
 
+          const scaledRadius = radius * (1 + (altitude || 0) / 6378);
           const [x, y, z] = convertToSphereCoords(
             [longitude, latitude],
-            radius,
+            scaledRadius,
           );
 
           // Validate the converted coordinates

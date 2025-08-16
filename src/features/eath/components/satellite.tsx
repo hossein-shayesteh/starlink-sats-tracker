@@ -138,9 +138,11 @@ const Satellite = ({
     // Update satellite positions and colors
     for (let i = 0; i < validSatellites.length; i++) {
       const satellite = validSatellites[i];
+      const scaledRadius = radius * (1 + (satellite.altitude || 0) / 6378);
+
       const [x, y, z] = convertToSphereCoords(
         [satellite.lon, satellite.lat],
-        radius,
+        scaledRadius,
       );
 
       // Update position
@@ -179,9 +181,10 @@ const Satellite = ({
     // Update glow ring for selected satellite
     if (glowRingRef.current && selectedIndex >= 0) {
       const satellite = validSatellites[selectedIndex];
+      const scaledRadius = radius * (1 + (satellite.altitude || 0) / 6378);
       const [x, y, z] = convertToSphereCoords(
         [satellite.lon, satellite.lat],
-        radius,
+        scaledRadius,
       );
 
       glowRingRef.current.position.set(x, y, z);

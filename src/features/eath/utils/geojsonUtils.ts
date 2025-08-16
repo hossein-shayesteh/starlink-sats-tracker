@@ -107,21 +107,20 @@ export const createCoordinateArray = (feature: Position[]): Position[] => {
 };
 
 export const convertToSphereCoords = (
-  coordinates_array: Position,
-  sphere_radius: number,
-): [number, number, number] => {
-  const lon = coordinates_array[0];
-  const lat = coordinates_array[1];
+  coord: [number, number],
+  baseRadius: number,
+  altitudeKm: number = 0,
+) => {
+  const [lon, lat] = coord;
+  const latRad = lat * (Math.PI / 180);
+  const lonRad = lon * (Math.PI / 180);
 
-  const x =
-    Math.cos((lat * Math.PI) / 180) *
-    Math.cos((lon * Math.PI) / 180) *
-    sphere_radius;
-  const y =
-    Math.cos((lat * Math.PI) / 180) *
-    Math.sin((lon * Math.PI) / 180) *
-    sphere_radius;
-  const z = Math.sin((lat * Math.PI) / 180) * sphere_radius;
+  // Scale radius with altitude (Earth radius = 6378 km)
+  const scaledRadius = baseRadius * (1 + altitudeKm / 6378);
+
+  const x = scaledRadius * Math.cos(latRad) * Math.cos(lonRad);
+  const y = scaledRadius * Math.cos(latRad) * Math.sin(lonRad);
+  const z = scaledRadius * Math.sin(latRad);
 
   return [x, y, z];
 };

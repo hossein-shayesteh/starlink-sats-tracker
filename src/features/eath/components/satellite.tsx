@@ -36,7 +36,7 @@ const Satellite = ({
   const mouse = useRef(new THREE.Vector2());
   const colorRef = useRef(new THREE.Color());
   const glowRingRef = useRef<THREE.Mesh>(null);
-  const selectionRadius = useRef(pointSize * 10);
+  const selectionRadius = useRef(pointSize * 30);
   const tempObject = useRef(new THREE.Object3D());
   const raycaster = useRef(new THREE.Raycaster());
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -252,7 +252,9 @@ const Satellite = ({
         );
 
         raycaster.current.setFromCamera(mouse.current, event.camera);
-        raycaster.current.params.Mesh = { threshold: selectionRadius.current };
+        raycaster.current.params.Mesh = {
+          threshold: selectionRadius.current,
+        };
 
         const intersects = raycaster.current.intersectObject(
           instancedMeshRef.current,
@@ -260,7 +262,9 @@ const Satellite = ({
         );
 
         if (intersects.length > 0 && intersects[0].instanceId !== undefined) {
-          foundSatellite = validSatellitesRef.current[intersects[0].instanceId];
+          const foundSatellite =
+            validSatellitesRef.current[intersects[0].instanceId];
+          onSatelliteClick(foundSatellite);
         }
       }
 

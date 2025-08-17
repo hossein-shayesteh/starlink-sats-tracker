@@ -5,7 +5,7 @@ import * as THREE from "three";
 
 const getPoints = ({ numStars = 500 }: { numStars: number }) => {
   const randomSpherePoint = () => {
-    const radius = Math.random() * 25 + 25;
+    const radius = Math.random() * 25 + 500;
     const u = Math.random();
     const v = Math.random();
     const theta = 2 * Math.PI * u;
@@ -15,7 +15,7 @@ const getPoints = ({ numStars = 500 }: { numStars: number }) => {
     const z = radius * Math.cos(phi);
     const rate = Math.random();
     const prob = Math.random();
-    const light = Math.random();
+    const light = Math.random() * 0.8;
 
     const update = (t: number) => {
       return prob > 0.8 ? light + Math.sin(t * rate) : light;

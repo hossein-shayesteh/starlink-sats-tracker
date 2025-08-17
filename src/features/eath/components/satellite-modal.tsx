@@ -1,27 +1,20 @@
 import { Globe, Rotate3D, Satellite, X } from "lucide-react";
 
-import { SatellitePosition } from "@/src/features/eath/components/satellite";
+import { SatellitePosition } from "@/src/features/eath/types";
 
 import { Button } from "@/src/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/src/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/src/components/ui/card";
 
 interface SatelliteModalProps {
   satellite: SatellitePosition | null;
   isOpen: boolean;
   onClose: () => void;
-  onShowOrbit?: (satelliteId: string) => void;
 }
 
 const SatelliteModal = ({
   satellite,
   isOpen,
   onClose,
-  onShowOrbit,
 }: SatelliteModalProps) => {
   if (!isOpen || !satellite) return null;
 
@@ -48,7 +41,7 @@ const SatelliteModal = ({
           <X size={20} />
         </Button>
       </CardHeader>
-      <CardContent className="flex-1">
+      <CardContent>
         {/* Status Bar */}
         <div className="mb-4 flex items-center space-x-2 rounded-lg bg-green-50 p-3">
           <div className="h-2 w-2 rounded-full bg-green-500"></div>
@@ -151,16 +144,6 @@ const SatelliteModal = ({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="pb-4">
-        {onShowOrbit && (
-          <Button
-            onClick={() => onShowOrbit(satellite.id)}
-            className="w-full bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700"
-          >
-            Show Orbit
-          </Button>
-        )}
-      </CardFooter>
     </Card>
   );
 };

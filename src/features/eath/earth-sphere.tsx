@@ -200,7 +200,13 @@ const EarthSphere = () => {
   }, [satellitesInfo, animate, updateSatellitePositions]);
 
   const handleSatelliteClick = (satellite: SatellitePosition) => {
-    setSelectedSatellite(satellite);
+    if (satellite.id === selectedSatellite?.id) {
+      setSelectedSatellite(null);
+      orbitInfo.current = null;
+    } else {
+      setSelectedSatellite(satellite);
+      handleShowOrbit(satellite.id);
+    }
     setIsModalOpen(true);
   };
 
@@ -293,7 +299,6 @@ const EarthSphere = () => {
         satellite={selectedSatellite}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onShowOrbit={handleShowOrbit}
       />
     </>
   );

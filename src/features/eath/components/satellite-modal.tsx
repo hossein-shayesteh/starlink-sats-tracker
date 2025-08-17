@@ -26,7 +26,7 @@ const SatelliteModal = ({
     <div className="pointer-events-none fixed inset-0 z-50">
       <Card className="pointer-events-auto fixed top-4 right-4 w-60 transform overflow-hidden rounded-lg border border-gray-700 bg-gray-900/95 pt-0 shadow-xl backdrop-blur-sm">
         {/* Compact Header */}
-        <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-blue-700 to-purple-800 p-0 p-2">
+        <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-blue-700 to-purple-800 p-2">
           <div className="flex min-w-0 flex-1 items-center space-x-2">
             <Satellite size={16} className="flex-shrink-0 text-white" />
             <div className="min-w-0 flex-1">

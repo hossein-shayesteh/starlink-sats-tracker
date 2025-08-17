@@ -52,3 +52,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - `/public/TLE` - Contains satellite TLE data files
 - `/public/geojson` - Contains Earth boundary GeoJSON files
 - `/public/textures` - Earth texture maps for day, night, and clouds
+
+## License
+Distributed under the MIT License. See `LICENSE` for more information.

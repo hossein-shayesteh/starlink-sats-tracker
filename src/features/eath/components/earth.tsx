@@ -80,19 +80,12 @@ const CountryLines = ({
       {lines.map((line) => {
         if (line.points.length < 2) return null;
 
-        // Random color generation like in original
-        let hue = 0.3 + Math.random() * 0.2;
-        if (Math.random() > 0.5) {
-          hue -= 0.3;
-        }
-        const color = new THREE.Color().setHSL(hue, 1, 1);
-
         return (
           <Line
             key={line.id}
-            points={line.points}
-            color={color}
-            transparent={true}
+            points={line.points} // Now strictly [number,number,number][]
+            color={new THREE.Color().setHSL(0.3 + Math.random() * 0.2, 1, 1)}
+            transparent
             opacity={fill ? 0.3 : 0.8}
           />
         );

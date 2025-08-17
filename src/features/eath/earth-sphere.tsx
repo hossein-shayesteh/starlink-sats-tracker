@@ -248,7 +248,7 @@ const EarthSphere = () => {
           {/*<fog attach="fog" args={[0x000000, 1, 100]} />*/}
 
           {/* Earth */}
-          <Earth fill={true} />
+          <Earth fill={false} />
 
           {/* Satellites */}
           {satellites.length > 0 && !isLoading && (

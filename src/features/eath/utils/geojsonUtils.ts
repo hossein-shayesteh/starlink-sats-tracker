@@ -77,40 +77,27 @@ export const interpolatePoints = (
 };
 
 export const createCoordinateArray = (feature: Position[]): Position[] => {
-  const temp_array: Position[] = [];
-  let interpolation_array: Position[] = [];
+  const result: Position[] = [];
 
-  for (let point_num = 0; point_num < feature.length; point_num++) {
-    const point1 = feature[point_num];
+  for (let i = 0; i < feature.length; i++) {
+    const current = feature[i];
+    result.push(current);
 
-    if (point_num > 0) {
-      const point2 = feature[point_num - 1];
-      if (needsInterpolation(point2, point1)) {
-        interpolation_array = [point2, point1];
-        interpolation_array = interpolatePoints(interpolation_array);
-
-        for (
-          let inter_point_num = 0;
-          inter_point_num < interpolation_array.length;
-          inter_point_num++
-        ) {
-          temp_array.push(interpolation_array[inter_point_num]);
-        }
-      } else {
-        temp_array.push(point1);
-      }
-    } else {
-      temp_array.push(point1);
+    // Interpolate if next point exists and is far away
+    if (i < feature.length - 1 && needsInterpolation(feature[i + 1], current)) {
+      const next = feature[i + 1];
+      result.push(getMidpoint(current, next));
     }
   }
-  return temp_array;
+
+  return result;
 };
 
 export const convertToSphereCoords = (
   coord: [number, number],
   baseRadius: number,
   altitudeKm: number = 0,
-) => {
+): [number, number, number] => {
   const [lon, lat] = coord;
   const latRad = lat * (Math.PI / 180);
   const lonRad = lon * (Math.PI / 180);

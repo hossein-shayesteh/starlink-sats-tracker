@@ -68,9 +68,9 @@ const getSprites = ({
 const Nebula = () => {
   const sprites = getSprites({
     numSprites: 5,
-    radius: 10,
+    radius: 1000,
     z: -10.5,
-    size: 24,
+    size: 360,
     opacity: 0.2,
     path: "./rad-grad.png",
   });

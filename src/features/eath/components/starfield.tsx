@@ -3,9 +3,9 @@ import React, { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-const getPoints = ({ numStars = 500 }: { numStars: number }) => {
+const getPoints = ({ numStars = 50 }: { numStars: number }) => {
   const randomSpherePoint = () => {
-    const radius = Math.random() * 25 + 500;
+    const radius = Math.random() * 25 + 1000;
     const u = Math.random();
     const v = Math.random();
     const theta = 2 * Math.PI * u;
@@ -15,7 +15,7 @@ const getPoints = ({ numStars = 500 }: { numStars: number }) => {
     const z = radius * Math.cos(phi);
     const rate = Math.random();
     const prob = Math.random();
-    const light = Math.random() * 0.8;
+    const light = Math.random();
 
     const update = (t: number) => {
       return prob > 0.8 ? light + Math.sin(t * rate) : light;
@@ -52,7 +52,7 @@ const getPoints = ({ numStars = 500 }: { numStars: number }) => {
   geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
 
   const mat = new THREE.PointsMaterial({
-    size: 0.2,
+    size: 0.001,
     vertexColors: true,
     map: new THREE.TextureLoader().load("./circle.png"),
   });

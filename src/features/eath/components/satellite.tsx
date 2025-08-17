@@ -153,11 +153,12 @@ const Satellite = ({
       const isSelected = i === selectedIndex;
 
       // Scale: selected > hovered > normal
-      let scale = 1;
+      const scaleWithDistance = scaledRadius * 0.75;
+      let scale = 1 * scaleWithDistance;
       if (isSelected) {
-        scale = 1.8 + Math.sin(time * 4) * 0.2; // Pulsing animation for selected
+        scale = (1.8 + Math.sin(time * 4) * 0.2) * scaleWithDistance; // Pulsing animation for selected
       } else if (isHovered) {
-        scale = 1.5;
+        scale = 1.5 * scaleWithDistance;
       }
 
       tempObject.current.scale.setScalar(scale);
@@ -168,7 +169,7 @@ const Satellite = ({
       if (isSelected) {
         colorRef.current.copy(satelliteSelectedColor);
         // Add slight brightness pulsing
-        const pulse = 0.8 + Math.sin(time * 3) * 0.2;
+        const pulse = (0.8 + Math.sin(time * 3) * 0.2) * scaleWithDistance;
         colorRef.current.multiplyScalar(pulse);
       } else if (isHovered) {
         colorRef.current.copy(satelliteHoverColor);

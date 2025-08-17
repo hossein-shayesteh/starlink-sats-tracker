@@ -17,7 +17,7 @@ import { SatellitePosition } from "@/src/features/eath/types";
 const StaticNebula = memo(Nebula);
 const StaticStarfield = memo(Starfield);
 
-interface SatelitesInfo {
+interface SatellitesInfo {
   name: string;
   satrec: satellite.SatRec;
 }
@@ -26,8 +26,8 @@ const EarthSphere = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [satellites, setSatellites] = useState<SatellitePosition[]>([]);
-  const [satellitesInfo, setSatellitesInfo] = useState<SatelitesInfo[]>([]);
-  const orbitInfo = useRef<SatelitesInfo | null>(null);
+  const [satellitesInfo, setSatellitesInfo] = useState<SatellitesInfo[]>([]);
+  const orbitInfo = useRef<SatellitesInfo | null>(null);
   const [selectedSatellite, setSelectedSatellite] =
     useState<SatellitePosition | null>(null);
 
@@ -49,7 +49,7 @@ const EarthSphere = () => {
 
       const tleContent = await response.text();
       const tleLines = tleContent.trim().split("\n");
-      const info: SatelitesInfo[] = [];
+      const info: SatellitesInfo[] = [];
 
       // Process all TLE data
       for (let i = 0; i < tleLines.length; i += 3) {
@@ -254,15 +254,15 @@ const EarthSphere = () => {
           {/*<fog attach="fog" args={[0x000000, 1, 100]} />*/}
 
           {/* Earth */}
-          <Earth fill={false} />
+          <Earth fill={true} />
 
           {/* Satellites */}
           {satellites.length > 0 && !isLoading && (
             <Satellite
               satellites={satellites}
               radius={2.01}
-              pointSize={0.004}
-              color="#00ff88"
+              pointSize={0.003}
+              color="#ff9500"
               selectedSatelliteId={selectedSatellite?.id || null}
               onSatelliteClick={handleSatelliteClick}
             />
@@ -277,13 +277,13 @@ const EarthSphere = () => {
             radius={2.01}
             color="#69b3a6"
             opacity={0.9}
-            width={10}
+            width={5}
           />
 
           {/* Controls */}
           <OrbitControls
             minDistance={2.12}
-            maxDistance={10}
+            maxDistance={100}
             rotateSpeed={0.08}
             enableDamping={true}
             dampingFactor={0.03}

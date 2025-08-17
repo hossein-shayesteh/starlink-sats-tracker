@@ -129,6 +129,7 @@ export interface SatellitePosition {
     apogee: number;
     meanAnomaly: number;
     meanMotion: number;
+    raan: number;
   };
   status?: string;
   launchDate?: string;

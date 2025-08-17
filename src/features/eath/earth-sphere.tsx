@@ -130,12 +130,13 @@ const EarthSphere = () => {
           orbitData: {
             inclination: satrec.inclo * (180 / Math.PI), // degrees
             eccentricity,
-            semiMajorAxis,
+            semiMajorAxis, // km
             period: (2 * Math.PI) / satrec.no, // minutes
-            perigee: satrec.argpo * (180 / Math.PI), // degrees
+            perigee: satrec.argpo * (180 / Math.PI), // km
             apogee: semiMajorAxis * (1 + eccentricity),
             meanAnomaly: satrec.mo * (180 / Math.PI), // degrees
             meanMotion: satrec.no * (1440 / (2 * Math.PI)), // revolutions per day
+            raan: satrec.nodeo * (180 / Math.PI), // degrees
           },
           status: "Active",
         });
@@ -242,57 +243,57 @@ const EarthSphere = () => {
       </div>
 
       {/* 3D Scene */}
-      <div className="h-screen w-screen">
-        <Canvas
-          camera={{ position: [0, 0, 5], fov: 75 }}
-          gl={{
-            antialias: false,
-            powerPreference: "high-performance",
-          }}
-        >
-          {/* Fog */}
-          {/*<fog attach="fog" args={[0x000000, 1, 100]} />*/}
 
-          {/* Earth */}
-          <Earth fill={true} />
+      <Canvas
+        className="relative h-screen w-screen"
+        camera={{ position: [0, 0, 5], fov: 75 }}
+        gl={{
+          antialias: false,
+          powerPreference: "high-performance",
+        }}
+      >
+        {/* Fog */}
+        {/*<fog attach="" args={[0x000000, 1, 100]} />*/}
 
-          {/* Satellites */}
-          {satellites.length > 0 && !isLoading && (
-            <Satellite
-              satellites={satellites}
-              radius={2.01}
-              pointSize={0.003}
-              color="#ff9500"
-              selectedSatelliteId={selectedSatellite?.id || null}
-              onSatelliteClick={handleSatelliteClick}
-            />
-          )}
+        {/* Earth */}
+        <Earth fill={false} />
 
-          {/* Static background elements */}
-          <StaticStarfield />
-          <StaticNebula />
-
-          <Orbit
-            date={orbitInfo.current}
+        {/* Satellites */}
+        {satellites.length > 0 && !isLoading && (
+          <Satellite
+            satellites={satellites}
             radius={2.01}
-            color="#69b3a6"
-            opacity={0.9}
-            width={5}
+            pointSize={0.003}
+            color="#ff9500"
+            selectedSatelliteId={selectedSatellite?.id || null}
+            onSatelliteClick={handleSatelliteClick}
           />
+        )}
 
-          {/* Controls */}
-          <OrbitControls
-            minDistance={2.12}
-            maxDistance={100}
-            rotateSpeed={0.08}
-            enableDamping={true}
-            dampingFactor={0.03}
-            enablePan={false}
-            maxPolarAngle={Math.PI}
-            minPolarAngle={0}
-          />
-        </Canvas>
-      </div>
+        {/* Static background elements */}
+        <StaticStarfield />
+        <StaticNebula />
+
+        <Orbit
+          date={orbitInfo.current}
+          radius={2.01}
+          color="#69b3a6"
+          opacity={0.9}
+          width={5}
+        />
+
+        {/* Controls */}
+        <OrbitControls
+          minDistance={2.12}
+          maxDistance={100}
+          rotateSpeed={0.08}
+          enableDamping={true}
+          dampingFactor={0.03}
+          enablePan={false}
+          maxPolarAngle={Math.PI}
+          minPolarAngle={0}
+        />
+      </Canvas>
 
       {/* Satellite Modal */}
       <SatelliteModal
